@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fenix · Web</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0d0f12;
+        overflow: hidden;
+        font-family: ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+      }
+      canvas {
+        display: block;
+        cursor: url('public/cursors/cursor_default.png') 0 0, auto;
+      }
+      #info {
+        position: fixed;
+        bottom: 12px;
+        left: 12px;
+        color: #8b94a3;
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        user-select: none;
+        pointer-events: none;
+      }
+      #info b {
+        color: #e6e9ef;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="info">
+      <b>clic izq.</b> agarra y arrastra · <b>clic der.</b> orbita · <b>rueda</b> zoom
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

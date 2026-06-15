@@ -1,0 +1,28 @@
+{
+  "name": "fenix-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Point-and-click 3D en navegador (three.js + Rapier). Prueba de concepto / base de desarrollo.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "format": "prettier --write \"src/**/*.{js,css}\" index.html",
+    "assets:optimize": "gltf-transform optimize public/models/_raw public/models --compress meshopt --texture-compress ktx2"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d": "^0.14.0",
+    "@dimforge/rapier3d-compat": "^0.19.3",
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "@gltf-transform/cli": "^4.0.0",
+    "lil-gui": "^0.19.2",
+    "prettier": "^3.3.3",
+    "stats.js": "^0.17.0",
+    "vite": "^5.4.0",
+    "vite-plugin-top-level-await": "^1.4.4",
+    "vite-plugin-wasm": "^3.3.0"
+  }
+}
