@@ -4,52 +4,52 @@ import { createLoop } from './engine/loop.js';
 import { createDebug } from './debug/debug.js';
 import * as THREE from 'three';
 
-import { buildRoom } from './game/room.js';
 import { buildLighting } from './game/lighting.js';
-import { buildLamp } from './game/lamp.js';
-import { spawnBox } from './game/props.js';
-import { buildCharacter } from './game/character.js';
 import { createInteraction } from './game/interaction.js';
 import { loadStaticMesh } from './game/loadModel.js';
 import { loadCharacter } from './game/loadCharacter.js';
 import { createInteractables } from './game/interactables.js';
-import { makeGrabbable } from './game/makeGrabbable.js';
 
 // --- capa de historia (datos -> escena) ---
-import { loadStory, indexStory, applyPlacement, ueVecToThree, ueRotToThree } from './game/story/loader.js';
+import {
+  loadStory,
+  indexStory,
+  applyPlacement,
+  ueVecToThree,
+  ueRotToThree,
+} from './game/story/loader.js';
 import { FenixState } from './game/story/gameState.js';
 import { setupInteraction } from './game/story/interaction.js';
 
 /* ------------------------------------------------------------------ *
- * EL JUEGO (PoC)
- * Sala con luz natural de dia (sol + cielo) y la lampara dinamica.
- * Clic izq. agarra y arrastra · clic der. orbita · rueda zoom.
- * Ahora la ESCENA la dirige la historia (fenix_prototype.v4.json):
- * carga el level_path como un modelo y solo coloca los items con logica.
+ * EL JUEGO
+ * La ESCENA la dirige la historia (fenix_prototype.v4.json): carga el
+ * level_path como un modelo y solo coloca los items con logica.
+ * Clic izq.: interactua/orbita · clic der.: orbita · rueda: zoom.
  * ------------------------------------------------------------------ */
 
 const { renderer, scene, camera, controls } = createRenderer(
   document.getElementById('app'),
 );
 camera.position.set(7, 5.5, 8);
-controls.target.set(0, 0, 0);      // rota alrededor del origen (0,0,0)
-controls.enablePan = false;        // sin desplazamiento lateral
+controls.target.set(0, 0, 0);
+controls.enablePan = false;
 controls.minDistance = 5;
 controls.maxDistance = 20;
 controls.update();
 const polar = controls.getPolarAngle();
-controls.minPolarAngle = polar;    // bloquea la inclinación vertical...
-controls.maxPolarAngle = polar;    // ...solo rotación izquierda-derecha
+controls.minPolarAngle = polar; // bloquea la inclinacion vertical...
+controls.maxPolarAngle = polar; // ...solo rotacion izquierda-derecha
 
 const physics = await createPhysics();
 const debug = createDebug();
 
 const daylight = buildLighting(scene, renderer); // sol + cielo + tone mapping
-buildRoom(scene, physics);
+
 loadStaticMesh(scene, renderer, '/models/SM_Base.glb', {
   position: [0, 0, 0],
-  scale: 1,        // si entra gigante, prueba 0.01
-  physics,         // quita esto si no quieres collider, solo decoración
+  scale: 1, // si entra gigante, prueba 0.01
+  physics,
 });
 
 const hotspots = createInteractables(renderer, camera);
@@ -64,15 +64,18 @@ const state = new FenixState(fenix);
 // "/Game/Scenes/L_Bedroom" -> "/models/L_Bedroom.glb"  (ajusta si tu naming cambia)
 const levelUrl = (lp) => `/models/${(lp ?? '').split('/').pop()}.glb`;
 
-let player = null;          // se rellena al cargar el personaje
-let pendingSpawn = null;    // spawn a aplicar cuando el player exista
-let sceneGroup = null;      // contenedor de la escena actual (para limpiar)
+let player = null; // se rellena al cargar el personaje
+let pendingSpawn = null; // spawn a aplicar cuando el player exista
+let sceneGroup = null; // contenedor de la escena actual (para limpiar)
 let storyInteractables = []; // proxies clicables de la escena actual
-let currentSceneName = '';  // para el HUD
+let currentSceneName = ''; // para el HUD
 
 const applySpawn = (spawn) => {
   if (!spawn) return;
-  if (!player) { pendingSpawn = spawn; return; }
+  if (!player) {
+    pendingSpawn = spawn;
+    return;
+  }
   // loadCharacter puede devolver el Object3D o un wrapper { root/model, update }
   const obj = player.root ?? player.model ?? player;
   if (obj?.position) {
@@ -83,11 +86,14 @@ const applySpawn = (spawn) => {
 };
 
 const disposeGroup = (g) => {
-  g.traverse((o) => { o.geometry?.dispose?.(); o.material?.dispose?.(); });
+  g.traverse((o) => {
+    o.geometry?.dispose?.();
+    o.material?.dispose?.();
+  });
   scene.remove(g);
 };
 
-// Hooks por escena para hotspots de mallas con nombre (como tu ejemplo de la cama).
+// Hooks por escena para hotspots de mallas con nombre (como el ejemplo de la cama).
 const onSceneLoaded = {
   'escena-bedroom': (model) => {
     hotspots.register(model, 'SM_Bed', {
@@ -110,11 +116,12 @@ async function loadScene(uuid) {
   storyInteractables = [];
 
   // 1) modelo de la escena (tu helper, con physics)
-  const model = await loadStaticMesh(sceneGroup, renderer, levelUrl(def.level_path), {
-    position: [0, 0, 0],
-    scale: 1,
-    physics,
-  });
+  const model = await loadStaticMesh(
+    sceneGroup,
+    renderer,
+    levelUrl(def.level_path),
+    { position: [0, 0, 0], scale: 1, physics },
+  );
   onSceneLoaded[def.uuid]?.(model);
 
   // 2) items con logica -> proxies clicables (la geometria va en el modelo)
@@ -125,8 +132,10 @@ async function loadScene(uuid) {
     const proxy = new THREE.Mesh(
       new THREE.BoxGeometry(0.9, 2, 0.2),
       new THREE.MeshBasicMaterial({
-        color: 0x44aaff, transparent: true,
-        opacity: debug.gui ? 0.35 : 0.0, depthWrite: false,
+        color: 0x44aaff,
+        transparent: true,
+        opacity: debug.gui ? 0.35 : 0.0,
+        depthWrite: false,
       }),
     );
     proxy.name = item.uuid;
@@ -145,12 +154,16 @@ async function loadScene(uuid) {
   }
 
   renderHud?.();
-  console.log(`[fenix] escena "${def.name}" cargada (${storyInteractables.length} interactuables)`);
+  console.log(
+    `[fenix] escena "${def.name}" cargada (${storyInteractables.length} interactuables)`,
+  );
 }
 
 // Activar un item: ejecuta sus eventos; TRAVEL_TO cambia de escena.
 const activateItem = (item) => {
-  state.applyEvents(item.events ?? [], { onTravel: (target) => loadScene(target) });
+  state.applyEvents(item.events ?? [], {
+    onTravel: (target) => loadScene(target),
+  });
 };
 
 // Raycast point-and-click solo para los items de la historia.
@@ -168,11 +181,11 @@ loadCharacter(scene, renderer, '/models/Player_Idle.glb', {
   rotationY: 15,
 }).then((p) => {
   player = p;
-  if (pendingSpawn) { applySpawn(pendingSpawn); pendingSpawn = null; }
+  if (pendingSpawn) {
+    applySpawn(pendingSpawn);
+    pendingSpawn = null;
+  }
 });
-
-const lamp = buildLamp(scene, physics, -1.6, 1.2, 1.4);
-const character = buildCharacter(scene, 2.2, 1.8);
 
 createInteraction(renderer, camera, physics, controls);
 
@@ -180,7 +193,8 @@ createInteraction(renderer, camera, physics, controls);
 let renderHud = null;
 if (debug.gui) {
   const hud = document.createElement('pre');
-  hud.style.cssText = 'position:fixed;bottom:8px;left:8px;margin:0;padding:8px;background:#0008;color:#fff;font:12px monospace;z-index:10';
+  hud.style.cssText =
+    'position:fixed;bottom:8px;left:8px;margin:0;padding:8px;background:#0008;color:#fff;font:12px monospace;z-index:10';
   document.body.appendChild(hud);
   renderHud = () => {
     const t = state.time;
@@ -200,31 +214,19 @@ await loadScene(fenix.startScene);
 if (debug.gui) {
   const params = {
     sombras: true,
-    luzLampara: true,
-    soltarMasCajas: () => {
-      for (let i = 0; i < 10; i++) {
-        spawnBox(scene, physics, -1.5 + Math.random() * 3, 3 + Math.random() * 2, -1 + Math.random() * 2.5, 0.45);
-      }
-    },
     reiniciar: () => location.reload(),
-  };
-
-  // De dia, la sombra de la lampara apenas se nota y la luz puntual con sombras
-  // es cara: la apagamos cuando el sol esta alto y la recuperamos de noche.
-  const syncLampShadow = () => {
-    const esDeDia = sky.elevacion > 8;
-    lamp.light.castShadow = params.sombras && params.luzLampara && !esDeDia;
   };
 
   // --- Sol / cielo ---
   const sky = { elevacion: 35, azimut: 150, exposicion: 0.6 };
   const sunFolder = debug.gui.addFolder('Sol / cielo');
-  const refresh = () => sunFolder.controllers.forEach((c) => c.updateDisplay());
-  const applySun = () => {
-    daylight.setSun(sky.elevacion, sky.azimut);
-    syncLampShadow();
-  };
-  sunFolder.add(sky, 'elevacion', -6, 90, 1).name('elevacion sol').onChange(applySun);
+  const refresh = () =>
+    sunFolder.controllers.forEach((c) => c.updateDisplay());
+  const applySun = () => daylight.setSun(sky.elevacion, sky.azimut);
+  sunFolder
+    .add(sky, 'elevacion', -6, 90, 1)
+    .name('elevacion sol')
+    .onChange(applySun);
   sunFolder.add(sky, 'azimut', 0, 360, 1).name('azimut').onChange(applySun);
   sunFolder
     .add(sky, 'exposicion', 0.2, 1.6, 0.01)
@@ -244,32 +246,23 @@ if (debug.gui) {
 
   // --- Escena ---
   const sceneFolder = debug.gui.addFolder('Escena');
-  sceneFolder.add(params, 'soltarMasCajas').name('+10 cajas');
   sceneFolder
     .add(params, 'sombras')
     .name('sombras')
     .onChange((v) => {
       renderer.shadowMap.enabled = v;
       daylight.sun.castShadow = v;
-      syncLampShadow();
       scene.traverse((o) => {
         if (o.isMesh) o.material.needsUpdate = true;
       });
     });
-  sceneFolder
-    .add(params, 'luzLampara')
-    .name('luz lampara')
-    .onChange((v) => {
-      lamp.light.visible = v;
-      syncLampShadow();
-    });
+  sceneFolder.add(params, 'reiniciar').name('reiniciar');
 
   // --- Historia: saltos rapidos entre escenas para probar ---
   const storyFolder = debug.gui.addFolder('Historia');
   const viajes = {};
   for (const s of fenix.scenes.values()) viajes[s.name] = () => loadScene(s.uuid);
   for (const name of Object.keys(viajes)) storyFolder.add(viajes, name);
-  sceneFolder.add(params, 'reiniciar').name('reiniciar');
 
   applySun(); // estado inicial coherente
   renderHud?.();
@@ -279,8 +272,6 @@ if (debug.gui) {
 createLoop((dt, now) => {
   debug.begin();
   physics.step();
-  lamp.syncLight();
-  character.update(now);
   if (player) player.update(dt);
 
   controls.update();
