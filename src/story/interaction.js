@@ -10,16 +10,13 @@ export function setupInteraction({ domElement, camera, getInteractables, onActiv
   const ndc = new THREE.Vector2();
   let down = null;
 
-  const onPointerDown = (e) => {
-    if (e.button !== 0) return;        // solo izquierdo; el der. orbita
-    down = { x: e.clientX, y: e.clientY };
-  };
+  const onPointerDown = (e) => { down = { x: e.clientX, y: e.clientY }; };
 
   const onPointerUp = (e) => {
-    if (!down || e.button !== 0) return;
+    if (!down) return;
     const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
     down = null;
-    if (moved > dragThreshold) return; // fue un drag, no un click
+    if (moved > dragThreshold) return; // fue un drag de la cámara, no un click
 
     const r = domElement.getBoundingClientRect();
     ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1;

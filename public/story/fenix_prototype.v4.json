@@ -1,0 +1,1149 @@
+{
+	"schema_version": "2.2",
+	"uuid": "historia-001",
+	"name": "Prototipo Fenix",
+	"description": "Primera historia de prueba",
+	"author": "Fenix Team",
+	"version": "1.3",
+	"status": "PUBLISH",
+	"start_scene": "escena-bedroom",
+	"settings": {
+		"time_mode": "STATIC",
+		"time_speed": 60,
+		"start_day": "MONDAY",
+		"start_time": "07:00",
+		"save_mode": "MANUAL"
+	},
+	"items": [
+		{
+			"uuid": "harina",
+			"name": "Harina",
+			"description": "Un paquete de harina de la tienda.",
+			"icon": "/Game/UI/Icons/T_Harina",
+			"stackable": true,
+			"max_stack": 99
+		}
+	],
+	"stats": [
+		{
+			"uuid": "monedas",
+			"name": "Monedas",
+			"description": "Dinero del jugador.",
+			"default": 10,
+			"min": 0,
+			"max": 9999,
+			"visible": true
+		},
+		{
+			"uuid": "deuda",
+			"name": "Deuda",
+			"description": "Lo que debes al tendero.",
+			"default": 0,
+			"min": 0,
+			"max": 9999,
+			"visible": true
+		}
+	],
+	"scenes": [
+		{
+			"uuid": "escena-bedroom",
+			"name": "Bedroom",
+			"level_path": "/Game/Scenes/L_Bedroom",
+			"items": [],
+			"is_checkpoint": false,
+			"player": {
+				"location": {
+					"x": 0,
+					"y": 0,
+					"z": 180
+				},
+				"rotation": {
+					"pitch": 0,
+					"yaw": 120,
+					"roll": 0
+				},
+				"scale": {
+					"x": 1,
+					"y": 1,
+					"z": 1
+				}
+			}
+		},
+		{
+			"uuid": "escena-salon",
+			"name": "Salon",
+			"items": [
+				{
+					"uuid": "item-door-salon-1",
+					"blueprint_class": "BP_Door",
+					"placement": {
+						"location": {
+							"x": -40,
+							"y": 100,
+							"z": 180
+						},
+						"rotation": {
+							"pitch": 0,
+							"yaw": 0,
+							"roll": 0
+						},
+						"scale": {
+							"x": 0.75,
+							"y": 0.75,
+							"z": 0.75
+						}
+					},
+					"conditions": {
+						"operator": "AND",
+						"rules": []
+					},
+					"events": [
+						{
+							"type": "TRAVEL_TO",
+							"target": "escena-bedroom",
+							"amount": 0
+						},
+						{
+							"type": "ADVANCE_TIME",
+							"target": "",
+							"amount": 2
+						}
+					],
+					"blocked_events": [],
+					"intercept_character": ""
+				},
+				{
+					"uuid": "item-door-salon-2",
+					"blueprint_class": "BP_Door",
+					"placement": {
+						"location": {
+							"x": -130,
+							"y": 360,
+							"z": 180
+						},
+						"rotation": {
+							"pitch": 0,
+							"yaw": 0,
+							"roll": 0
+						},
+						"scale": {
+							"x": 0.75,
+							"y": 0.75,
+							"z": 0.75
+						}
+					},
+					"conditions": {
+						"operator": "AND",
+						"rules": []
+					},
+					"events": [
+						{
+							"type": "TRAVEL_TO",
+							"target": "escena-tienda",
+							"amount": 0
+						},
+						{
+							"type": "ADVANCE_TIME",
+							"target": "",
+							"amount": 10
+						}
+					],
+					"blocked_events": [],
+					"intercept_character": ""
+				},
+				{
+					"uuid": "item-door-salon-3",
+					"blueprint_class": "BP_Door",
+					"placement": {
+						"location": {
+							"x": -550,
+							"y": 90,
+							"z": 180
+						},
+						"rotation": {
+							"pitch": 0,
+							"yaw": 0,
+							"roll": 0
+						},
+						"scale": {
+							"x": 0.75,
+							"y": 0.75,
+							"z": 0.75
+						}
+					},
+					"conditions": {
+						"operator": "AND",
+						"rules": []
+					},
+					"events": [
+						{
+							"type": "TRAVEL_TO",
+							"target": "escena-cocina",
+							"amount": 0
+						},
+						{
+							"type": "ADVANCE_TIME",
+							"target": "",
+							"amount": 2
+						}
+					],
+					"blocked_events": [],
+					"intercept_character": ""
+				}
+			],
+			"is_checkpoint": false,
+			"player": {
+				"location": {
+					"x": -185,
+					"y": 155,
+					"z": 230
+				},
+				"rotation": {
+					"pitch": 0,
+					"yaw": 120,
+					"roll": 0
+				},
+				"scale": {
+					"x": 1,
+					"y": 1,
+					"z": 1
+				}
+			},
+			"level_path": "/Game/Scenes/L_Salon"
+		},
+		{
+			"uuid": "escena-tienda",
+			"name": "Tienda",
+			"items": [
+				{
+					"uuid": "item-door-tienda-1",
+					"blueprint_class": "BP_Door",
+					"placement": {
+						"location": {
+							"x": -78,
+							"y": 366,
+							"z": 170
+						},
+						"rotation": {
+							"pitch": 0,
+							"yaw": 0,
+							"roll": 0
+						},
+						"scale": {
+							"x": 0.5,
+							"y": 0.5,
+							"z": 0.5
+						}
+					},
+					"conditions": {
+						"operator": "AND",
+						"rules": [
+							{
+								"type": "STAT_BELOW",
+								"target": "deuda",
+								"status": "",
+								"amount": 1
+							}
+						]
+					},
+					"events": [
+						{
+							"type": "TRAVEL_TO",
+							"target": "escena-salon",
+							"amount": 0
+						},
+						{
+							"type": "ADVANCE_TIME",
+							"target": "",
+							"amount": 2
+						}
+					],
+					"blocked_events": [],
+					"intercept_character": "char-tendero",
+					"intercept_node": "node-bronca"
+				},
+				{
+					"uuid": "item-harina",
+					"blueprint_class": "BP_Ingredientes",
+					"placement": {
+						"location": {
+							"x": -204,
+							"y": 29,
+							"z": 168
+						},
+						"rotation": {
+							"pitch": 0,
+							"yaw": 0,
+							"roll": 0
+						},
+						"scale": {
+							"x": 0.5,
+							"y": 0.5,
+							"z": 0.5
+						}
+					},
+					"conditions": {
+						"operator": "AND",
+						"rules": []
+					},
+					"events": [
+						{
+							"type": "ITEM_GIVE",
+							"target": "harina",
+							"amount": 1
+						},
+						{
+							"type": "STAT_ADD",
+							"target": "deuda",
+							"amount": 2
+						}
+					],
+					"blocked_events": [
+						{
+							"type": "SHOW_TEXT",
+							"target": "Harina basica de trigo. Sirve para cocinar todo tipo de recetas.",
+							"amount": 1
+						}
+					],
+					"intercept_character": ""
+				}
+			],
+			"is_checkpoint": false,
+			"player": {
+				"location": {
+					"x": -73,
+					"y": 134,
+					"z": 230
+				},
+				"rotation": {
+					"pitch": 0,
+					"yaw": 140,
+					"roll": 0
+				},
+				"scale": {
+					"x": 1,
+					"y": 1,
+					"z": 1
+				}
+			},
+			"level_path": "/Game/Scenes/L_Tienda"
+		},
+		{
+			"uuid": "escena-cocina",
+			"name": "Cocina",
+			"items": [
+				{
+					"uuid": "item-door-cocina-1",
+					"blueprint_class": "BP_Door",
+					"placement": {
+						"location": {
+							"x": -50,
+							"y": 100,
+							"z": 175
+						},
+						"rotation": {
+							"pitch": 0,
+							"yaw": 0,
+							"roll": 0
+						},
+						"scale": {
+							"x": 0.75,
+							"y": 0.75,
+							"z": 0.75
+						}
+					},
+					"conditions": {
+						"operator": "AND",
+						"rules": []
+					},
+					"events": [
+						{
+							"type": "TRAVEL_TO",
+							"target": "escena-salon",
+							"amount": 0
+						},
+						{
+							"type": "ADVANCE_TIME",
+							"target": "",
+							"amount": 2
+						}
+					],
+					"blocked_events": [],
+					"intercept_character": ""
+				},
+				{
+					"uuid": "item-silla-cocina",
+					"blueprint_class": "BP_Chair",
+					"placement": {
+						"location": {
+							"x": -195,
+							"y": 540,
+							"z": 175
+						},
+						"rotation": {
+							"pitch": 0,
+							"yaw": 90,
+							"roll": 0
+						},
+						"scale": {
+							"x": 0.25,
+							"y": 0.25,
+							"z": 0.25
+						}
+					},
+					"conditions": {
+						"operator": "AND",
+						"rules": []
+					},
+					"events": [],
+					"blocked_events": [],
+					"intercept_character": "",
+					"intercept_node": ""
+				}
+			],
+			"is_checkpoint": false,
+			"player": {
+				"location": {
+					"x": -55,
+					"y": 255,
+					"z": 225
+				},
+				"rotation": {
+					"pitch": 0,
+					"yaw": 120,
+					"roll": 0
+				},
+				"scale": {
+					"x": 1,
+					"y": 1,
+					"z": 1
+				}
+			},
+			"level_path": "/Game/Scenes/L_Cocina"
+		}
+	],
+	"characters": [
+		{
+			"uuid": "char-tendero",
+			"name": "Tendero",
+			"blueprint_class": "BP_Tendero",
+			"dialogue_uuid": "dialogue-tendero",
+			"routine_uuid": "routine-tendero",
+			"is_player": false,
+			"inventory": [],
+			"stats": []
+		},
+		{
+			"uuid": "char-mom",
+			"name": "Mom",
+			"blueprint_class": "BP_Mom",
+			"dialogue_uuid": "dialogue-mom",
+			"routine_uuid": "routine-mom",
+			"is_player": false,
+			"inventory": [],
+			"stats": []
+		},
+		{
+			"uuid": "char-player",
+			"name": "Player",
+			"blueprint_class": "BP_FenixCharacter",
+			"is_player": true,
+			"dialogue_uuid": null,
+			"routine_uuid": null,
+			"inventory": [],
+			"stats": [
+				{
+					"name": "monedas",
+					"value": 10
+				},
+				{
+					"name": "deuda",
+					"value": 0
+				}
+			]
+		}
+	],
+	"dialogues": [
+		{
+			"uuid": "dialogue-tendero",
+			"start_node": "node-buenos-dias",
+			"nodes": [
+				{
+					"uuid": "node-tienes-deuda",
+					"text": "Ey! Tienes cosas sin pagar. Son 2 monedas.",
+					"priority": 20,
+					"once": false,
+					"conditions": {
+						"operator": "AND",
+						"rules": [
+							{
+								"type": "STAT_ABOVE",
+								"target": "deuda",
+								"status": "",
+								"amount": 0
+							}
+						]
+					},
+					"responses": [
+						{
+							"uuid": "resp-pagar-si",
+							"text": "Aqui tienes.",
+							"conditions": {
+								"operator": "AND",
+								"rules": [
+									{
+										"type": "STAT_ABOVE",
+										"target": "monedas",
+										"status": "",
+										"amount": 1
+									}
+								]
+							},
+							"next_node_uuid": "node-gracias",
+							"events": [
+								{
+									"type": "STAT_TAKE",
+									"target": "monedas",
+									"amount": 2
+								},
+								{
+									"type": "STAT_TAKE",
+									"target": "deuda",
+									"amount": 2
+								}
+							]
+						},
+						{
+							"uuid": "resp-pagar-no",
+							"text": "No llevo dinero.",
+							"conditions": {
+								"operator": "AND",
+								"rules": []
+							},
+							"next_node_uuid": "node-sin-dinero",
+							"events": []
+						}
+					]
+				},
+				{
+					"uuid": "node-gracias",
+					"text": "Gracias! Que aproveche.",
+					"priority": 0,
+					"once": false,
+					"conditions": {
+						"operator": "AND",
+						"rules": []
+					},
+					"responses": [
+						{
+							"uuid": "resp-adios-gracias",
+							"text": "Hasta luego.",
+							"conditions": {
+								"operator": "AND",
+								"rules": []
+							},
+							"next_node_uuid": "",
+							"events": []
+						}
+					]
+				},
+				{
+					"uuid": "node-sin-dinero",
+					"text": "Pues entonces devuelveme las cosas. No te voy a fiar.",
+					"priority": 0,
+					"once": false,
+					"conditions": {
+						"operator": "AND",
+						"rules": []
+					},
+					"responses": [
+						{
+							"uuid": "resp-devolver",
+							"text": "Lo siento...",
+							"conditions": {
+								"operator": "AND",
+								"rules": []
+							},
+							"next_node_uuid": "",
+							"events": [
+								{
+									"type": "ITEM_TAKE",
+									"target": "harina",
+									"amount": 1
+								},
+								{
+									"type": "STAT_TAKE",
+									"target": "deuda",
+									"amount": 2
+								}
+							]
+						}
+					]
+				},
+				{
+					"uuid": "node-buenas-tardes",
+					"text": "Buenas tardes! En que te puedo ayudar?",
+					"priority": 10,
+					"once": false,
+					"conditions": {
+						"operator": "AND",
+						"rules": [
+							{
+								"type": "TIME_AFTER",
+								"target": "14:00",
+								"status": "",
+								"amount": 0
+							}
+						]
+					},
+					"responses": [
+						{
+							"uuid": "resp-solo-mirar-tarde",
+							"text": "Solo miraba.",
+							"conditions": {
+								"operator": "AND",
+								"rules": []
+							},
+							"next_node_uuid": "node-despedida",
+							"events": []
+						}
+					]
+				},
+				{
+					"uuid": "node-buenos-dias",
+					"text": "Buenos dias! En que te puedo ayudar?",
+					"priority": 5,
+					"once": false,
+					"conditions": {
+						"operator": "AND",
+						"rules": []
+					},
+					"responses": [
+						{
+							"uuid": "resp-solo-mirar",
+							"text": "Solo miraba.",
+							"conditions": {
+								"operator": "AND",
+								"rules": []
+							},
+							"next_node_uuid": "node-despedida",
+							"events": []
+						}
+					]
+				},
+				{
+					"uuid": "node-despedida",
+					"text": "Cuando quieras! Aqui estare.",
+					"priority": 0,
+					"once": false,
+					"conditions": {
+						"operator": "AND",
+						"rules": []
+					},
+					"responses": [
+						{
+							"uuid": "resp-adios",
+							"text": "Hasta luego.",
+							"conditions": {
+								"operator": "AND",
+								"rules": []
+							},
+							"next_node_uuid": "",
+							"events": []
+						}
+					]
+				},
+				{
+					"uuid": "node-bronca",
+					"text": "PERO QUE HACES?! Adonde vas con esa harina sin pagar?! Te crees que esto es un buffet libre?! Para! Para ahora mismo!",
+					"priority": 0,
+					"once": false,
+					"conditions": {
+						"operator": "AND",
+						"rules": []
+					},
+					"responses": [
+						{
+							"uuid": "resp-bronca-pagar",
+							"text": "Pago ahora, lo siento mucho.",
+							"conditions": {
+								"operator": "AND",
+								"rules": [
+									{
+										"type": "STAT_ABOVE",
+										"target": "monedas",
+										"status": "",
+										"amount": 1
+									}
+								]
+							},
+							"next_node_uuid": "node-bronca-pagar",
+							"events": []
+						},
+						{
+							"uuid": "resp-bronca-escapar",
+							"text": "Corro mas rapido que tu, viejo!",
+							"conditions": {
+								"operator": "AND",
+								"rules": [
+									{
+										"type": "STAT_ABOVE",
+										"target": "monedas",
+										"status": "",
+										"amount": 1
+									}
+								]
+							},
+							"next_node_uuid": "node-bronca-escapar-fail",
+							"events": []
+						},
+						{
+							"uuid": "resp-bronca-sin-dinero",
+							"text": "Es que... no tengo dinero...",
+							"conditions": {
+								"operator": "AND",
+								"rules": []
+							},
+							"next_node_uuid": "node-bronca-sin-dinero",
+							"events": []
+						}
+					]
+				},
+				{
+					"uuid": "node-bronca-pagar",
+					"text": "Eso pensaba yo! Seran dos monedas. Y la proxima vez que intentes algo asi llamo a la guardia, me has entendido?! A LA GUARDIA!",
+					"priority": 0,
+					"once": false,
+					"conditions": {
+						"operator": "AND",
+						"rules": []
+					},
+					"responses": [
+						{
+							"uuid": "resp-bronca-pagar-ok",
+							"text": "Si, si, lo siento. Aqui tiene.",
+							"conditions": {
+								"operator": "AND",
+								"rules": []
+							},
+							"next_node_uuid": "node-bronca-perdonado",
+							"events": [
+								{
+									"type": "STAT_TAKE",
+									"target": "monedas",
+									"amount": 2
+								},
+								{
+									"type": "STAT_TAKE",
+									"target": "deuda",
+									"amount": 2
+								}
+							]
+						}
+					]
+				},
+				{
+					"uuid": "node-bronca-escapar-fail",
+					"text": "CORRER?! Llevo 40 anos detras de este mostrador, crio! Tengo las piernas como troncos! Dame eso!",
+					"priority": 0,
+					"once": false,
+					"conditions": {
+						"operator": "AND",
+						"rules": []
+					},
+					"responses": [
+						{
+							"uuid": "resp-bronca-escapar-rendirse",
+							"text": "Vale, vale! Pago, pago!",
+							"conditions": {
+								"operator": "AND",
+								"rules": []
+							},
+							"next_node_uuid": "node-bronca-perdonado",
+							"events": [
+								{
+									"type": "STAT_TAKE",
+									"target": "monedas",
+									"amount": 2
+								},
+								{
+									"type": "STAT_TAKE",
+									"target": "deuda",
+									"amount": 2
+								}
+							]
+						}
+					]
+				},
+				{
+					"uuid": "node-bronca-perdonado",
+					"text": "Mas te vale. Ahora fuera de mi tienda. Y dile a tu madre que te ensene modales!",
+					"priority": 0,
+					"once": false,
+					"conditions": {
+						"operator": "AND",
+						"rules": []
+					},
+					"responses": [
+						{
+							"uuid": "resp-bronca-perdonado-ok",
+							"text": "Que tenga buen dia...",
+							"conditions": {
+								"operator": "AND",
+								"rules": []
+							},
+							"next_node_uuid": "",
+							"events": []
+						}
+					]
+				},
+				{
+					"uuid": "node-bronca-sin-dinero",
+					"text": "SIN DINERO?! Has cogido mi harina SIN DINERO?! Pero quien te has creido que eres?! Devuelvemela AHORA MISMO y sal de mi tienda antes de que cuente hasta tres! UNO...",
+					"priority": 0,
+					"once": false,
+					"conditions": {
+						"operator": "AND",
+						"rules": []
+					},
+					"responses": [
+						{
+							"uuid": "resp-bronca-devolver",
+							"text": "Lo siento mucho, no era mi intencion...",
+							"conditions": {
+								"operator": "AND",
+								"rules": []
+							},
+							"next_node_uuid": "node-bronca-echado",
+							"events": [
+								{
+									"type": "ITEM_TAKE",
+									"target": "harina",
+									"amount": 1
+								},
+								{
+									"type": "STAT_TAKE",
+									"target": "deuda",
+									"amount": 2
+								}
+							]
+						}
+					]
+				},
+				{
+					"uuid": "node-bronca-echado",
+					"text": "DOS! TRES! Fuera! FUERA! Y no vuelvas hasta que tengas dinero como la gente! Sinverguenza!",
+					"priority": 0,
+					"once": false,
+					"conditions": {
+						"operator": "AND",
+						"rules": []
+					},
+					"responses": [
+						{
+							"uuid": "resp-bronca-echado-ok",
+							"text": "Me voy, me voy...",
+							"conditions": {
+								"operator": "AND",
+								"rules": []
+							},
+							"next_node_uuid": "",
+							"events": [
+								{
+									"type": "TRAVEL_TO",
+									"target": "escena-salon",
+									"amount": 0
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"uuid": "dialogue-mom",
+			"start_node": "node-mom-inicio",
+			"nodes": [
+				{
+					"uuid": "node-mom-entrega",
+					"text": "Has traido la harina! Muchas gracias cariño, eres un cielo.",
+					"conditions": {
+						"operator": "AND",
+						"rules": [
+							{
+								"type": "STEP",
+								"target": "step-hablar-mom",
+								"status": "COMPLETED",
+								"amount": 0
+							},
+							{
+								"type": "PLAYER_HAS_ITEM",
+								"target": "harina",
+								"status": "",
+								"amount": 1
+							}
+						]
+					},
+					"responses": [
+						{
+							"uuid": "resp-mom-entrega",
+							"text": "Aqui tienes, mama.",
+							"conditions": {
+								"operator": "AND",
+								"rules": []
+							},
+							"next_node_uuid": "",
+							"events": [
+								{
+									"type": "ITEM_TAKE",
+									"target": "harina",
+									"amount": 1
+								}
+							]
+						}
+					],
+					"priority": 30,
+					"once": false
+				},
+				{
+					"uuid": "node-mom-espera",
+					"text": "Date prisa! Necesito la harina para terminar la comida.",
+					"conditions": {
+						"operator": "AND",
+						"rules": [
+							{
+								"type": "STEP",
+								"target": "step-hablar-mom",
+								"status": "COMPLETED",
+								"amount": 0
+							},
+							{
+								"type": "PLAYER_NOT_HAS_ITEM",
+								"target": "harina",
+								"status": "",
+								"amount": 1
+							}
+						]
+					},
+					"responses": [
+						{
+							"uuid": "resp-mom-voy",
+							"text": "Ya voy.",
+							"conditions": {
+								"operator": "AND",
+								"rules": []
+							},
+							"next_node_uuid": "",
+							"events": []
+						}
+					],
+					"priority": 20,
+					"once": false
+				},
+				{
+					"uuid": "node-mom-inicio",
+					"text": "Cariño, necesito que me hagas un favor. Me falta harina para terminar la comida. Aqui tienes unas monedas, ve a la tienda a comprarla.",
+					"conditions": {
+						"operator": "AND",
+						"rules": [
+							{
+								"type": "STEP",
+								"target": "step-hablar-mom",
+								"status": "PENDING",
+								"amount": 0
+							}
+						]
+					},
+					"responses": [
+						{
+							"uuid": "resp-mom-acepto",
+							"text": "Ahora voy.",
+							"conditions": {
+								"operator": "AND",
+								"rules": []
+							},
+							"next_node_uuid": "",
+							"events": [
+								{
+									"type": "STAT_ADD",
+									"target": "monedas",
+									"amount": 5
+								}
+							]
+						},
+						{
+							"uuid": "resp-mom-ahora-no",
+							"text": "Ahora no puedo.",
+							"conditions": {
+								"operator": "AND",
+								"rules": []
+							},
+							"next_node_uuid": "node-mom-insiste",
+							"events": []
+						}
+					],
+					"priority": 10,
+					"once": true
+				},
+				{
+					"uuid": "node-mom-insiste",
+					"text": "Venga, no tardaras nada. La tienda esta aqui al lado.",
+					"conditions": {
+						"operator": "AND",
+						"rules": [
+							{
+								"type": "STEP",
+								"target": "step-hablar-mom",
+								"status": "PENDING",
+								"amount": 0
+							}
+						]
+					},
+					"responses": [
+						{
+							"uuid": "resp-mom-insiste-ok",
+							"text": "Vale, voy.",
+							"conditions": {
+								"operator": "AND",
+								"rules": []
+							},
+							"next_node_uuid": "",
+							"events": [
+								{
+									"type": "STAT_ADD",
+									"target": "monedas",
+									"amount": 5
+								}
+							]
+						}
+					],
+					"priority": 5,
+					"once": false
+				}
+			]
+		}
+	],
+	"routines": [
+		{
+			"uuid": "routine-tendero",
+			"schedules": [
+				{
+					"uuid": "schedule-tendero-1",
+					"action": "IDLE",
+					"using_item_uuid": null,
+					"days": [
+						"MONDAY",
+						"TUESDAY",
+						"WEDNESDAY",
+						"THURSDAY",
+						"FRIDAY",
+						"SATURDAY",
+						"SUNDAY"
+					],
+					"scene_uuid": "escena-tienda",
+					"time_from": "07:00",
+					"time_to": "22:00",
+					"placement": {
+						"location": {
+							"x": -320,
+							"y": 226,
+							"z": 117
+						},
+						"rotation": {
+							"pitch": 0,
+							"yaw": 0,
+							"roll": 0
+						},
+						"scale": {
+							"x": 0.75,
+							"y": 0.75,
+							"z": 0.75
+						}
+					}
+				}
+			],
+			"special_days": []
+		},
+		{
+			"uuid": "routine-mom",
+			"schedules": [
+				{
+					"uuid": "schedule-mom-1",
+					"action": "SIT",
+					"using_item_uuid": "item-silla-cocina",
+					"days": [
+						"MONDAY",
+						"TUESDAY",
+						"WEDNESDAY",
+						"THURSDAY",
+						"FRIDAY",
+						"SATURDAY",
+						"SUNDAY"
+					],
+					"scene_uuid": "escena-cocina",
+					"time_from": "07:00",
+					"time_to": "22:00",
+					"placement": {
+						"location": {
+							"x": -295,
+							"y": 205,
+							"z": 138
+						},
+						"rotation": {
+							"pitch": 0,
+							"yaw": -90,
+							"roll": 0
+						},
+						"scale": {
+							"x": 1,
+							"y": 1,
+							"z": 1
+						}
+					}
+				}
+			],
+			"special_days": []
+		}
+	],
+	"quests": [
+		{
+			"uuid": "quest-recado",
+			"name": "El recado de mama",
+			"description": "La madre necesita harina para terminar la comida.",
+			"steps": [
+				{
+					"uuid": "step-hablar-mom",
+					"type": "TALK_TO",
+					"target": "char-mom",
+					"optional": false,
+					"requires": "",
+					"item": ""
+				},
+				{
+					"uuid": "step-hablar-tendero",
+					"type": "TALK_TO",
+					"target": "char-tendero",
+					"optional": true,
+					"requires": "",
+					"item": ""
+				},
+				{
+					"uuid": "step-recoger-harina",
+					"type": "COLLECT",
+					"target": "harina",
+					"optional": false,
+					"requires": "",
+					"item": ""
+				},
+				{
+					"uuid": "step-entregar",
+					"type": "DELIVER",
+					"target": "char-mom",
+					"optional": false,
+					"requires": "step-recoger-harina",
+					"item": "harina"
+				}
+			]
+		}
+	]
+}

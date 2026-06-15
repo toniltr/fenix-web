@@ -2,6 +2,7 @@ import { createRenderer } from './engine/renderer.js';
 import { createPhysics } from './engine/physics.js';
 import { createLoop } from './engine/loop.js';
 import { createDebug } from './debug/debug.js';
+import * as THREE from 'three';
 
 import { buildRoom } from './game/room.js';
 import { buildLighting } from './game/lighting.js';
@@ -14,10 +15,17 @@ import { loadCharacter } from './game/loadCharacter.js';
 import { createInteractables } from './game/interactables.js';
 import { makeGrabbable } from './game/makeGrabbable.js';
 
+// --- capa de historia (datos -> escena) ---
+import { loadStory, indexStory, applyPlacement, ueVecToThree, ueRotToThree } from './game/story/loader.js';
+import { FenixState } from './game/story/gameState.js';
+import { setupInteraction } from './game/story/interaction.js';
+
 /* ------------------------------------------------------------------ *
  * EL JUEGO (PoC)
  * Sala con luz natural de dia (sol + cielo) y la lampara dinamica.
  * Clic izq. agarra y arrastra · clic der. orbita · rueda zoom.
+ * Ahora la ESCENA la dirige la historia (fenix_prototype.v4.json):
+ * carga el level_path como un modelo y solo coloca los items con logica.
  * ------------------------------------------------------------------ */
 
 const { renderer, scene, camera, controls } = createRenderer(
@@ -46,32 +54,147 @@ loadStaticMesh(scene, renderer, '/models/SM_Base.glb', {
 
 const hotspots = createInteractables(renderer, camera);
 
-loadStaticMesh(scene, renderer, '/models/L_Bedroom.glb', {
-  position: [0, 0, 0],
-  scale: 1,
-  physics,
-}).then((model) => {
-  hotspots.register(model, 'SM_Bed', {
-    label: 'Cama',
-    onClick: () => console.log('[fenix] clic en la cama'),
+/* ================================================================== *
+ * HISTORIA FENIX
+ * ================================================================== */
+
+const fenix = indexStory(await loadStory('/story/fenix_prototype.v4.json'));
+const state = new FenixState(fenix);
+
+// "/Game/Scenes/L_Bedroom" -> "/models/L_Bedroom.glb"  (ajusta si tu naming cambia)
+const levelUrl = (lp) => `/models/${(lp ?? '').split('/').pop()}.glb`;
+
+let player = null;          // se rellena al cargar el personaje
+let pendingSpawn = null;    // spawn a aplicar cuando el player exista
+let sceneGroup = null;      // contenedor de la escena actual (para limpiar)
+let storyInteractables = []; // proxies clicables de la escena actual
+let currentSceneName = '';  // para el HUD
+
+const applySpawn = (spawn) => {
+  if (!spawn) return;
+  if (!player) { pendingSpawn = spawn; return; }
+  // loadCharacter puede devolver el Object3D o un wrapper { root/model, update }
+  const obj = player.root ?? player.model ?? player;
+  if (obj?.position) {
+    obj.position.copy(spawn.position);
+    obj.quaternion?.copy(spawn.quaternion);
+  }
+  controls.target.copy(spawn.position).add(new THREE.Vector3(0, 1, 0));
+};
+
+const disposeGroup = (g) => {
+  g.traverse((o) => { o.geometry?.dispose?.(); o.material?.dispose?.(); });
+  scene.remove(g);
+};
+
+// Hooks por escena para hotspots de mallas con nombre (como tu ejemplo de la cama).
+const onSceneLoaded = {
+  'escena-bedroom': (model) => {
+    hotspots.register(model, 'SM_Bed', {
+      label: 'Cama',
+      onClick: () => console.log('[fenix] clic en la cama'),
+    });
+  },
+};
+
+async function loadScene(uuid) {
+  const def = fenix.getScene(uuid);
+  if (!def) throw new Error(`Escena inexistente: ${uuid}`);
+
+  if (sceneGroup) disposeGroup(sceneGroup);
+  // TODO: limpiar tambien los colliders de physics del nivel anterior
+  sceneGroup = new THREE.Group();
+  sceneGroup.name = `escena:${def.name}`;
+  currentSceneName = def.name;
+  scene.add(sceneGroup);
+  storyInteractables = [];
+
+  // 1) modelo de la escena (tu helper, con physics)
+  const model = await loadStaticMesh(sceneGroup, renderer, levelUrl(def.level_path), {
+    position: [0, 0, 0],
+    scale: 1,
+    physics,
   });
+  onSceneLoaded[def.uuid]?.(model);
+
+  // 2) items con logica -> proxies clicables (la geometria va en el modelo)
+  for (const item of def.items ?? []) {
+    if (!state.evaluateConditions(item.conditions)) continue;
+    if (!(item.events?.length || item.intercept_character)) continue;
+
+    const proxy = new THREE.Mesh(
+      new THREE.BoxGeometry(0.9, 2, 0.2),
+      new THREE.MeshBasicMaterial({
+        color: 0x44aaff, transparent: true,
+        opacity: debug.gui ? 0.35 : 0.0, depthWrite: false,
+      }),
+    );
+    proxy.name = item.uuid;
+    proxy.userData.item = item;
+    applyPlacement(proxy, item.placement);
+    sceneGroup.add(proxy);
+    storyInteractables.push(proxy);
+  }
+
+  // 3) spawn del jugador
+  if (def.player) {
+    applySpawn({
+      position: ueVecToThree(def.player.location),
+      quaternion: ueRotToThree(def.player.rotation),
+    });
+  }
+
+  renderHud?.();
+  console.log(`[fenix] escena "${def.name}" cargada (${storyInteractables.length} interactuables)`);
+}
+
+// Activar un item: ejecuta sus eventos; TRAVEL_TO cambia de escena.
+const activateItem = (item) => {
+  state.applyEvents(item.events ?? [], { onTravel: (target) => loadScene(target) });
+};
+
+// Raycast point-and-click solo para los items de la historia.
+setupInteraction({
+  domElement: renderer.domElement,
+  camera,
+  getInteractables: () => storyInteractables,
+  onActivate: activateItem,
 });
 
-let player = null;
+// Personaje del jugador (tu loader). El spawn lo pone la escena.
 loadCharacter(scene, renderer, '/models/Player_Idle.glb', {
   position: [0, 0.5, 0],
   scale: 1,
   rotationY: 15,
 }).then((p) => {
   player = p;
+  if (pendingSpawn) { applySpawn(pendingSpawn); pendingSpawn = null; }
 });
-
 
 const lamp = buildLamp(scene, physics, -1.6, 1.2, 1.4);
 const character = buildCharacter(scene, 2.2, 1.8);
 
-
 createInteraction(renderer, camera, physics, controls);
+
+// HUD de estado (solo en dev)
+let renderHud = null;
+if (debug.gui) {
+  const hud = document.createElement('pre');
+  hud.style.cssText = 'position:fixed;bottom:8px;left:8px;margin:0;padding:8px;background:#0008;color:#fff;font:12px monospace;z-index:10';
+  document.body.appendChild(hud);
+  renderHud = () => {
+    const t = state.time;
+    hud.textContent =
+      `escena: ${currentSceneName}  ` +
+      `| ${t.day} ${String(t.hour).padStart(2, '0')}:${String(t.minute).padStart(2, '0')}  ` +
+      `| monedas: ${state.getStat('monedas')}  deuda: ${state.getStat('deuda')}  ` +
+      `| inv: ${Object.keys(state.inventory).join(', ') || '—'}`;
+  };
+  state.addEventListener('change', renderHud);
+}
+
+// Arrancar en la escena inicial de la historia
+await loadScene(fenix.startScene);
 
 /* --- Panel de depuracion (solo en dev) --- */
 if (debug.gui) {
@@ -140,9 +263,16 @@ if (debug.gui) {
       lamp.light.visible = v;
       syncLampShadow();
     });
+
+  // --- Historia: saltos rapidos entre escenas para probar ---
+  const storyFolder = debug.gui.addFolder('Historia');
+  const viajes = {};
+  for (const s of fenix.scenes.values()) viajes[s.name] = () => loadScene(s.uuid);
+  for (const name of Object.keys(viajes)) storyFolder.add(viajes, name);
   sceneFolder.add(params, 'reiniciar').name('reiniciar');
 
   applySun(); // estado inicial coherente
+  renderHud?.();
 }
 
 /* --- Bucle --- */
@@ -155,8 +285,8 @@ createLoop((dt, now) => {
 
   controls.update();
   renderer.render(scene, camera);
-  
+
   debug.end();
 });
 
-console.log('[fenix] juego con luz de dia listo');
+console.log('[fenix] juego con historia listo');
